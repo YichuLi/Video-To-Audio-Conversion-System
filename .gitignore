@@ -1,0 +1,9 @@
+.DS_Store
+.idea
+.vscode
+venv/
+**/secret.yaml
+*.mp3
+*.mp4
+*.wav
+*.avi
