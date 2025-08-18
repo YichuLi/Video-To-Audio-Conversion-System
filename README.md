@@ -8,7 +8,7 @@ This project is a microservices-based distributed system that allows users to au
 - **Languages**: Python
 - **Frameworks**: Flask (for microservices)
 - **Messaging**: RabbitMQ (for async job queueing)
-- **Database**: MongoDB
+- **Database**: MongoDB & MySQL
 - **Containerization**: Docker
 - **Orchestration**: Kubernetes
 
