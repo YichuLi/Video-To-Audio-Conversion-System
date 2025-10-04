@@ -1,5 +1,28 @@
 import pika, json
 import traceback # Import the traceback module
+import os
+
+def get_channel():
+    """Ensure RabbitMQ channel is alive. Reconnect if needed."""
+    global connection, channel
+
+    try:
+        # Try to declare a passive queue to check if channel is alive
+        channel.queue_declare(queue="video", passive=True)
+        return channel
+    except Exception as e:
+        print("RabbitMQ channel lost, reconnecting...")
+        try:
+            connection = pika.BlockingConnection(
+                pika.ConnectionParameters(os.environ.get("RABBITMQ_HOST", "rabbitmq"))
+            )
+            channel = connection.channel()
+            print("Reconnected to RabbitMQ successfully.")
+            return channel
+        except Exception as conn_err:
+            print("RabbitMQ reconnection failed:")
+            traceback.print_exc()
+            return None
 
 def upload(f, fs, channel, access):
     fid = None # Initialize fid to None
@@ -24,7 +47,11 @@ def upload(f, fs, channel, access):
     # Publish message to RabbitMQ
     try:
         print("Attempting channel.basic_publish...")
-        channel.basic_publish(
+        ch = get_channel()
+        if not ch:
+            return "internal server error: cannot connect to RabbitMQ", 500
+
+        ch.basic_publish(
             exchange="",
             routing_key="video",
             body=json.dumps(message),
